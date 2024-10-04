@@ -23,8 +23,8 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import YourResourceModel, DataValidationError, db
-from .factories import YourResourceModelFactory
+from service.models import Promotion, DataValidationError, db
+from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -32,11 +32,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  YourResourceModel   M O D E L   T E S T   C A S E S
+#  Promotion   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceModel(TestCase):
-    """Test Cases for YourResourceModel Model"""
+class TestPromotion(TestCase):
+    """Test Cases for Promotion Model"""
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +54,7 @@ class TestYourResourceModel(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -65,15 +65,22 @@ class TestYourResourceModel(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
-        """It should create a YourResourceModel"""
-        # Todo: Remove this test case example
-        resource = YourResourceModelFactory()
-        resource.create()
-        self.assertIsNotNone(resource.id)
-        found = YourResourceModel.all()
+    def test_create_promotion(self):
+        """It should create a Promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertIsNotNone(promotion.id)
+        found = Promotion.all()
         self.assertEqual(len(found), 1)
-        data = YourResourceModel.find(resource.id)
-        self.assertEqual(data.name, resource.name)
+        data = Promotion.find(promotion.id)
+        self.assertEqual(data.title, promotion.title)
+        self.assertEqual(data.description, promotion.description)
+        self.assertEqual(data.promo_code, promotion.promo_code)
+        self.assertEqual(data.promo_type, promotion.promo_type)
+        self.assertEqual(data.promo_value, promotion.promo_value)
+        self.assertEqual(data.start_date, promotion.start_date)
+        self.assertEqual(data.created_date, promotion.created_date)
+        self.assertEqual(data.duration, promotion.duration)
+        self.assertEqual(data.active, promotion.active)
 
     # Todo: Add your test cases here...

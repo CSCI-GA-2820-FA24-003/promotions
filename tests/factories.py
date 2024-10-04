@@ -2,19 +2,30 @@
 Test Factory to make fake objects for testing
 """
 
+from datetime import timedelta, date
+import random
 import factory
-from service.models import YourResourceModel
+from factory import Faker, LazyFunction
+from service.models import Promotion, PromotionType
 
 
-class YourResourceModelFactory(factory.Factory):
-    """Creates fake pets that you don't have to feed"""
+class PromotionFactory(factory.Factory):
+    """Creates fake promotion"""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps factory to data model"""
 
-        model = YourResourceModel
+        model = Promotion
 
     id = factory.Sequence(lambda n: n)
-    name = factory.Faker("first_name")
+    title = Faker("sentence", nb_words=4)
+    description = Faker("paragraph", nb_sentences=2)
+    promo_code = Faker("ean8")
+    promo_type = LazyFunction(lambda: random.choice(list(PromotionType)))
+    promo_value = Faker("random_number", digits=2, fix_len=False)
+    start_date = LazyFunction(lambda: date.today())
+    created_date = LazyFunction(lambda: date.today())
+    duration = LazyFunction(lambda: timedelta(days=random.randint(1, 30)))
+    active = Faker("boolean")
 
     # Todo: Add your other attributes here...
