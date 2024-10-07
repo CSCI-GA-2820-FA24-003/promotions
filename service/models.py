@@ -150,11 +150,11 @@ class Promotion(db.Model):
         return cls.query.session.get(cls, by_id)
 
     @classmethod
-    def find_by_name(cls, name):
-        """Returns all Promotions with the given name
+    def find_by_title(cls, title):
+        """Returns all Promotions with the given title
 
         Args:
-            name (string): the name of the Promotions you want to match
+            title (string): the title of the Promotions you want to match
         """
-        logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.title == name)
+        logger.info("Processing title query for %s ...", title)
+        return cls.query.filter(cls.title == title)
