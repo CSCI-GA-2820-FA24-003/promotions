@@ -24,7 +24,7 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.common import status
-from service.models import db, Promotion, PromotionType, DataValidationError
+from service.models import db, Promotion
 from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
@@ -36,6 +36,8 @@ BASE_URL = "/promotions"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
+
+
 class TestYourResourceService(TestCase):
     """REST API Server Tests"""
 
@@ -80,7 +82,6 @@ class TestYourResourceService(TestCase):
             test_promotion.id = new_promotion["id"]
             promotions.append(test_promotion)
         return promotions
-    
     
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
