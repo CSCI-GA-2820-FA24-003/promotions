@@ -46,22 +46,27 @@ class Promotion(db.Model):
     active = db.Column(db.Boolean)
 
     # Todo: Place the rest of your schema here...
+    ##################################################
+    # INSTANCE METHODS
+    ##################################################
 
     def __repr__(self):
         return f"<Promotion {self.title} id=[{self.id}]>"
 
     def create(self):
         """
-        Creates a Promotion to the database
+        Creates a Promotion in the database after validating the data.
         """
-        logger.info("Creating %s", self.title)
-        self.id = None  # pylint: disable=invalid-name
+        logger.info("Attempting to create promotion: %s", self.title)
+        self.id = None  # Ensure the ID is None for a new record
+
         try:
             db.session.add(self)
             db.session.commit()
+            logger.info("Promotion created with ID: %s", self.id)
         except Exception as e:
             db.session.rollback()
-            logger.error("Error creating record: %s", self)
+            logger.error("Error creating Promotion: %s", e)
             raise DataValidationError(e) from e
 
     def update(self):
@@ -94,11 +99,11 @@ class Promotion(db.Model):
             "title": self.title,
             "description": self.description,
             "promo_code": self.promo_code,
-            "promo_type": self.promo_type,
+            "promo_type": self.promo_type.name,
             "promo_value": self.promo_value,
             "start_date": self.start_date,
             "created_date": self.created_date,
-            "duration": self.duration,
+            "duration": str(self.duration),
             "active": self.active,
         }
 
