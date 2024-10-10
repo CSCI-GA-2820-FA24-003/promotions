@@ -48,6 +48,7 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
+
 ######################################################################
 # LIST ALL PROMOTIONS
 ######################################################################
@@ -88,7 +89,10 @@ def get_promotions(promotion_id):
     # Attempt to find the Promotion and abort if not found
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
 
     app.logger.info("Returning promotion: %s", promotion.title)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
@@ -118,7 +122,66 @@ def create_promotion():
 
     # Return the location of the new promotion
     location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
-    return jsonify(promotion.serialize()), status.HTTP_201_CREATED, {"Location": location_url}
+    return (
+        jsonify(promotion.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
+
+######################################################################
+# UPDATE AN EXISTING PROMOTION
+######################################################################
+@app.route("/promotions/<int:promotion_id>", methods=["PUT"])
+def update_promotions(promotion_id):
+    """
+    Update a Promotion
+
+    This endpoint will update a Promotion based the body that is posted
+    """
+    app.logger.info("Request to Update a promotion with id [%s]", promotion_id)
+    check_content_type("application/json")
+
+    # Attempt to find the Promotion and abort if not found
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
+
+    # Update the Promotion with the new data
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+    promotion.deserialize(data)
+
+    # Save the updates to the database
+    promotion.update()
+
+    app.logger.info("Promotion with ID: %d updated.", promotion.id)
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# DELETE A PROMOTION
+######################################################################
+@app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
+def delete_promotions(promotion_id):
+    """
+    Delete a Promotion
+
+    This endpoint will delete a Promotion based the id specified in the path
+    """
+    app.logger.info("Request to Delete a promotion with id [%s]", promotion_id)
+
+    # Delete the Promotion if it exists
+    promotion = Promotion.find(promotion_id)
+    if promotion:
+        app.logger.info("Promotion with ID: %d found.", promotion.id)
+        promotion.delete()
+
+    app.logger.info("Promotion with ID: %d delete complete.", promotion_id)
+    return {}, status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
@@ -141,4 +204,6 @@ def check_content_type(content_type) -> None:
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {content_type}",
     )
+
+
 # Todo: Additional REST API endpoints (Update, Delete).

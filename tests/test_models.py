@@ -25,6 +25,7 @@ from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, db, PromotionType
 from .factories import PromotionFactory
+from service.models import Promotion, db, PromotionType, DataValidationError
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -86,14 +87,20 @@ class TestPromotion(TestCase):
 
     def test_create_a_promotion(self):
         """It should Create a promotion and assert that it exists"""
-        promotion = Promotion(title="New Customer", promo_type=PromotionType.PERCENTAGE_DISCOUNT, active=True)
+        promotion = Promotion(
+            title="New Customer",
+            promo_type=PromotionType.PERCENTAGE_DISCOUNT,
+            active=True,
+        )
         self.assertEqual(str(promotion), "<Promotion New Customer id=[None]>")
         self.assertTrue(promotion is not None)
         self.assertEqual(promotion.id, None)
         self.assertEqual(promotion.title, "New Customer")
         self.assertEqual(promotion.promo_type, PromotionType.PERCENTAGE_DISCOUNT)
         self.assertEqual(promotion.active, True)
-        promotion = Promotion(title="New Customer", promo_type=PromotionType.AMOUNT_DISCOUNT, active=False)
+        promotion = Promotion(
+            title="New Customer", promo_type=PromotionType.AMOUNT_DISCOUNT, active=False
+        )
         self.assertEqual(promotion.active, False)
         self.assertEqual(promotion.promo_type, PromotionType.AMOUNT_DISCOUNT)
 
@@ -101,7 +108,11 @@ class TestPromotion(TestCase):
         """It should Create a promotion and add it to the database"""
         promotions = Promotion.all()
         self.assertEqual(promotions, [])
-        promotion = Promotion(title="New Customer", promo_type=PromotionType.PERCENTAGE_DISCOUNT, active=True)
+        promotion = Promotion(
+            title="New Customer",
+            promo_type=PromotionType.PERCENTAGE_DISCOUNT,
+            active=True,
+        )
         self.assertTrue(promotion is not None)
         self.assertEqual(promotion.id, None)
         promotion.create()
@@ -109,3 +120,42 @@ class TestPromotion(TestCase):
         self.assertIsNotNone(promotion.id)
         promotions = promotion.all()
         self.assertEqual(len(promotions), 1)
+
+    # update & delete
+    def test_update_promotion(self):
+        """It should Update a Promotion"""
+        promotion = PromotionFactory()
+        logging.debug(promotion)
+        promotion.create()
+        self.assertIsNotNone(promotion.id)
+
+        # Change it an save it
+        promotion.title = "Updated Title"
+        original_id = promotion.id
+        promotion.update()
+        self.assertEqual(promotion.id, original_id)
+        self.assertEqual(promotion.title, "Updated Title")
+
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        promotions = Promotion.all()
+        self.assertEqual(len(promotions), 1)
+        self.assertEqual(promotions[0].id, original_id)
+        self.assertEqual(promotions[0].title, "Updated Title")
+
+    def test_update_no_id(self):
+        """It should not Update a Promotion with no id"""
+        promotion = PromotionFactory()
+        logging.debug(promotion)
+        promotion.id = None
+        self.assertRaises(DataValidationError, promotion.update)
+
+    def test_delete_promotion(self):
+        """It should Delete a Promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+
+        # delete the promotion and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
