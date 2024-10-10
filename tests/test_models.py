@@ -23,7 +23,6 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Promotion, db, PromotionType
 from .factories import PromotionFactory
 from service.models import Promotion, db, PromotionType, DataValidationError
 
