@@ -18,7 +18,7 @@ class PromotionFactory(factory.Factory):
         model = Promotion
 
     id = factory.Sequence(lambda n: n)
-    title = Faker("sentence", nb_words=4)
+    title = Faker("text", max_nb_chars=40)
     description = Faker("paragraph", nb_sentences=2)
     promo_code = Faker("ean8")
     promo_type = LazyFunction(lambda: random.choice(list(PromotionType)))
