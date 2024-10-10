@@ -45,7 +45,6 @@ class Promotion(db.Model):
     duration = db.Column(db.Interval)
     active = db.Column(db.Boolean)
 
-    # Todo: Place the rest of your schema here...
     ##################################################
     # INSTANCE METHODS
     ##################################################

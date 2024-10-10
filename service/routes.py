@@ -48,7 +48,6 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
 ######################################################################
 # LIST ALL PROMOTIONS
 ######################################################################
@@ -64,7 +63,7 @@ def list_promotions():
 
     if title:
         app.logger.info("Find by title: %s", title)
-        promotions = Promotion.find_by_category(title)
+        promotions = Promotion.find_by_title(title)
     else:
         app.logger.info("Find all")
         promotions = Promotion.all()

@@ -82,7 +82,7 @@ class TestYourResourceService(TestCase):
             test_promotion.id = new_promotion["id"]
             promotions.append(test_promotion)
         return promotions
-    
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -94,7 +94,6 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         self.assertEqual(data["name"], "Promotion REST API Service")
 
-    # Todo: Add your test cases here...
     # ----------------------------------------------------------
     # TEST CREATE
     # ----------------------------------------------------------
