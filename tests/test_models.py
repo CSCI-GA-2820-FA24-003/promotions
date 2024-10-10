@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for promotion Model
 """
 
 # pylint: disable=duplicate-code
@@ -23,7 +23,7 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Promotion, DataValidationError, db
+from service.models import Promotion, db, PromotionType
 from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
@@ -56,6 +56,7 @@ class TestPromotion(TestCase):
         """This runs before each test"""
         db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
+        self.client = app.test_client()
 
     def tearDown(self):
         """This runs after each test"""
@@ -83,4 +84,28 @@ class TestPromotion(TestCase):
         self.assertEqual(data.duration, promotion.duration)
         self.assertEqual(data.active, promotion.active)
 
-    # Todo: Add your test cases here...
+    def test_create_a_promotion(self):
+        """It should Create a promotion and assert that it exists"""
+        promotion = Promotion(title="New Customer", promo_type=PromotionType.PERCENTAGE_DISCOUNT, active=True)
+        self.assertEqual(str(promotion), "<Promotion New Customer id=[None]>")
+        self.assertTrue(promotion is not None)
+        self.assertEqual(promotion.id, None)
+        self.assertEqual(promotion.title, "New Customer")
+        self.assertEqual(promotion.promo_type, PromotionType.PERCENTAGE_DISCOUNT)
+        self.assertEqual(promotion.active, True)
+        promotion = Promotion(title="New Customer", promo_type=PromotionType.AMOUNT_DISCOUNT, active=False)
+        self.assertEqual(promotion.active, False)
+        self.assertEqual(promotion.promo_type, PromotionType.AMOUNT_DISCOUNT)
+
+    def test_add_a_promotion(self):
+        """It should Create a promotion and add it to the database"""
+        promotions = Promotion.all()
+        self.assertEqual(promotions, [])
+        promotion = Promotion(title="New Customer", promo_type=PromotionType.PERCENTAGE_DISCOUNT, active=True)
+        self.assertTrue(promotion is not None)
+        self.assertEqual(promotion.id, None)
+        promotion.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(promotion.id)
+        promotions = promotion.all()
+        self.assertEqual(len(promotions), 1)

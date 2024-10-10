@@ -33,8 +33,13 @@ from service.common import status  # HTTP Status Codes
 @app.route("/")
 def index():
     """Root URL response"""
+    app.logger.info("Request for Root URL")
     return (
-        "Reminder: return some useful information in json format about the service here",
+        jsonify(
+            name="Promotion REST API Service",
+            version="1.0",
+            paths=url_for("list_promotions", _external=True),
+        ),
         status.HTTP_200_OK,
     )
 
@@ -43,4 +48,97 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
+######################################################################
+# LIST ALL PROMOTIONS
+######################################################################
+@app.route("/promotions", methods=["GET"])
+def list_promotions():
+    """Returns all of the Promotions"""
+    app.logger.info("Request for promotion list")
+
+    promotions = []
+
+    # Parse any arguments from the query string
+    title = request.args.get("title")
+
+    if title:
+        app.logger.info("Find by title: %s", title)
+        promotions = Promotion.find_by_title(title)
+    else:
+        app.logger.info("Find all")
+        promotions = Promotion.all()
+
+    results = [promotion.serialize() for promotion in promotions]
+    app.logger.info("Returning %d promotions", len(results))
+    return jsonify(results), status.HTTP_200_OK
+
+
+######################################################################
+# READ A PROMOTION
+######################################################################
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def get_promotions(promotion_id):
+    """
+    Retrieve a single Promotion
+
+    This endpoint will return a Promotion based on it's id
+    """
+    app.logger.info("Request to Retrieve a promotion with id [%s]", promotion_id)
+
+    # Attempt to find the Promotion and abort if not found
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+
+    app.logger.info("Returning promotion: %s", promotion.title)
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# CREATE A NEW PROMOTION
+######################################################################
+@app.route("/promotions", methods=["POST"])
+def create_promotion():
+    """
+    Creates a new Promotion
+    This endpoint will create a Promotion based the data in the body that is posted
+    """
+    app.logger.info("Request to create a new promotion")
+    check_content_type("application/json")
+
+    promotion = Promotion()
+    # Get the data from the request and deserialize it
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+    promotion.deserialize(data)
+
+    # Save the new promotion to the database
+    promotion.create()
+    app.logger.info("promotion with new id [%s] saved!", promotion.id)
+
+    # Return the location of the new promotion
+    location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
+    return jsonify(promotion.serialize()), status.HTTP_201_CREATED, {"Location": location_url}
+
+
+######################################################################
+# Checks the ContentType of a request
+######################################################################
+def check_content_type(content_type) -> None:
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )
+# Todo: Additional REST API endpoints (Update, Delete).
