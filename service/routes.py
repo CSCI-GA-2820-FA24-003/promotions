@@ -40,7 +40,7 @@ def index():
             version="1.0",
             description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, and delete promotions.",
             paths={
-                "get_all_promotions": {
+                "list_promotions": {
                     "method": "GET",
                     "url": url_for("list_promotions", _external=True)
                 },
