@@ -51,6 +51,14 @@ def index():
                 "create_promotion": {
                     "method": "POST",
                     "url": url_for("create_promotion", _external=True),
+                },
+                "update_promotion": {
+                    "method": "PUT",
+                    "url": url_for("update_promotion", promotion_id=1, _external=True) 
+                },
+                "delete_promotion": {
+                    "method": "DELETE",
+                    "url": url_for("delete_promotion", promotion_id=1, _external=True) 
                 }
             }
         ),

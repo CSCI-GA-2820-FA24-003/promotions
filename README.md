@@ -6,8 +6,8 @@
 ## API Usage
 local depolyment: http://localhost:8080/
 1. Read a promotion  
-Method: GET  
-Endpont: /promotions/{promotion_id}  
+Method: `GET`
+Endpont: `/promotions/{promotion_id}`  
 Response:  
 ```json
 {
@@ -24,8 +24,8 @@ Response:
 }
 ```
 2. Create a promotion   
-Method: POST  
-Endpont: /promotions  
+Method: `POST`  
+Endpont: `/promotions`  
 Response:  
 ```json
 {
@@ -42,11 +42,10 @@ Response:
 }
 ```
 3. Find all promotions  
-Method: GET  
-Endpont: /promotions  
+Method: `GET`  
+Endpont: `/promotions`
 Response:  
 ```json
-[
     {
         "active": true,
         "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
@@ -71,8 +70,35 @@ Response:
         "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
         "title": "test2"
     }
-]
+
 ```
+
+4. Update all promotions  
+Method: `PUT`  
+  Endpont:`/promotions/<int:promotion_id> `  
+  Response:
+  ```json
+     {     
+    "active": true,
+    "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "description": "test d",
+    "duration": "15 days, 0:00:00",
+    "id": 1,
+    "promo_code": 11000,
+    "promo_type": "AMOUNT_DISCOUNT",
+    "promo_value": "test v",
+    "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "title": "new_test"
+}
+```
+
+
+4. Delate promotions  
+Method: DELETE  
+  Endpont: `/promotions/<int:promotion_id>`
+  Response: HTTP_204_NO_CONTENT
+
+
 
 ## Automatic Setup
 
