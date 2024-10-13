@@ -94,7 +94,7 @@ Method: `PUT`
 
 
 4. Delate promotions  
-Method: DELETE  
+Method: `DELETE`  
   Endpont:`/promotions/<int:promotion_id>`  
   Response: HTTP_204_NO_CONTENT
 
