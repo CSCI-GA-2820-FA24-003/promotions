@@ -3,11 +3,102 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
 
-This is a skeleton you can use to start your projects
+## API Usage
+local depolyment: http://localhost:8080/
+1. Read a promotion  
+Method: `GET`  
+Endpont: `/promotions/{promotion_id}`  
+Response:  
+```json
+{
+    "active": true,
+    "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "description": "test d",
+    "duration": "15 days, 0:00:00",
+    "id": 2,
+    "promo_code": 11000,
+    "promo_type": "AMOUNT_DISCOUNT",
+    "promo_value": "test v",
+    "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "title": "test2"
+}
+```
+2. Create a promotion   
+Method: `POST`  
+Endpont: `/promotions`  
+Response:  
+```json
+{
+    "active": true,
+    "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "description": "test d",
+    "duration": "15 days, 0:00:00",
+    "id": 2,
+    "promo_code": 11000,
+    "promo_type": "AMOUNT_DISCOUNT",
+    "promo_value": "test v",
+    "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "title": "test2"
+}
+```
+3. Find all promotions  
+Method: `GET`  
+Endpont: `/promotions`  
+Response:  
+```json
+    {
+        "active": true,
+        "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+        "description": "test d",
+        "duration": "15 days, 0:00:00",
+        "id": 1,
+        "promo_code": 11000,
+        "promo_type": "AMOUNT_DISCOUNT",
+        "promo_value": "test v",
+        "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+        "title": "test"
+    },
+    {
+        "active": true,
+        "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+        "description": "test d",
+        "duration": "15 days, 0:00:00",
+        "id": 2,
+        "promo_code": 11000,
+        "promo_type": "AMOUNT_DISCOUNT",
+        "promo_value": "test v",
+        "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+        "title": "test2"
+    }
 
-## Overview
+```
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
+4. Update all promotions  
+Method: `PUT`  
+  Endpont:`/promotions/<int:promotion_id> `  
+  Response:
+  ```json
+     {     
+    "active": true,
+    "created_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "description": "test d",
+    "duration": "15 days, 0:00:00",
+    "id": 1,
+    "promo_code": 11000,
+    "promo_type": "AMOUNT_DISCOUNT",
+    "promo_value": "test v",
+    "start_date": "Tue, 08 Oct 2024 00:00:00 GMT",
+    "title": "new_test"
+}
+```
+
+
+4. Delate promotions  
+Method: `DELETE`  
+  Endpont:`/promotions/<int:promotion_id>`  
+  Response: HTTP_204_NO_CONTENT
+
+
 
 ## Automatic Setup
 
