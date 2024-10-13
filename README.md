@@ -6,7 +6,7 @@
 ## API Usage
 local depolyment: http://localhost:8080/
 1. Read a promotion  
-Method: `GET`
+Method: `GET`  
 Endpont: `/promotions/{promotion_id}`  
 Response:  
 ```json
@@ -43,7 +43,7 @@ Response:
 ```
 3. Find all promotions  
 Method: `GET`  
-Endpont: `/promotions`
+Endpont: `/promotions`  
 Response:  
 ```json
     {
@@ -95,7 +95,7 @@ Method: `PUT`
 
 4. Delate promotions  
 Method: DELETE  
-  Endpont: `/promotions/<int:promotion_id>`
+  Endpont:`/promotions/<int:promotion_id>`  
   Response: HTTP_204_NO_CONTENT
 
 
