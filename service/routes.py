@@ -38,7 +38,8 @@ def index():
         jsonify(
             name="Promotion REST API Service",
             version="1.0",
-            description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, and delete promotions.",
+            description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, " +
+            "and delete promotions.",
             paths={
                 "list_promotions": {
                     "method": "GET",
@@ -46,7 +47,7 @@ def index():
                 },
                 "get_promotion": {
                     "method": "GET",
-                    "url": url_for("get_promotions", promotion_id=1, _external=True),
+                    "url": url_for("get_promotion", promotion_id=1, _external=True),
                 },
                 "create_promotion": {
                     "method": "POST",
@@ -54,11 +55,11 @@ def index():
                 },
                 "update_promotion": {
                     "method": "PUT",
-                    "url": url_for("update_promotion", promotion_id=1, _external=True) 
+                    "url": url_for("update_promotion", promotion_id=1, _external=True)
                 },
                 "delete_promotion": {
                     "method": "DELETE",
-                    "url": url_for("delete_promotion", promotion_id=1, _external=True) 
+                    "url": url_for("delete_promotion", promotion_id=1, _external=True)
                 }
             }
         ),
@@ -100,7 +101,7 @@ def list_promotions():
 # READ A PROMOTION
 ######################################################################
 @app.route("/promotions/<int:promotion_id>", methods=["GET"])
-def get_promotions(promotion_id):
+def get_promotion(promotion_id):
     """
     Retrieve a single Promotion
 
@@ -143,7 +144,7 @@ def create_promotion():
     app.logger.info("promotion with new id [%s] saved!", promotion.id)
 
     # Return the location of the new promotion
-    location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
+    location_url = url_for("get_promotion", promotion_id=promotion.id, _external=True)
     return (
         jsonify(promotion.serialize()),
         status.HTTP_201_CREATED,
@@ -155,7 +156,7 @@ def create_promotion():
 # UPDATE AN EXISTING PROMOTION
 ######################################################################
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
-def update_promotions(promotion_id):
+def update_promotion(promotion_id):
     """
     Update a Promotion
 
@@ -188,7 +189,7 @@ def update_promotions(promotion_id):
 # DELETE A PROMOTION
 ######################################################################
 @app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
-def delete_promotions(promotion_id):
+def delete_promotion(promotion_id):
     """
     Delete a Promotion
 

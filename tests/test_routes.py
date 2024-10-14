@@ -131,6 +131,34 @@ class TestYourResourceService(TestCase):
         self.assertEqual(new_promotion["active"], test_promotion.active)
 
     # ----------------------------------------------------------
+    # TEST METHOD NOT ALLOWED
+    # ----------------------------------------------------------
+    def test_method_not_allowed(self):
+        """It should return method not allowed"""
+        response = self.client.patch(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    # ----------------------------------------------------------
+    # TEST CREATE WITH EMPTY DATA
+    # ----------------------------------------------------------
+    def test_create_promotion_empty_data(self):
+        """It should not create a promotion because of empty data"""
+        logging.debug("Test promotion with empty data")
+        response = self.client.post(BASE_URL, json={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # ----------------------------------------------------------
+    # TEST UNSUPPORTED MEDIA TYPE
+    # ----------------------------------------------------------
+    def test_unsupported_media_type(self):
+        """It should not create a promotion when sending wrong media type"""
+        test_promotion = PromotionFactory()
+        response = self.client.post(
+            BASE_URL, json=test_promotion.serialize(), content_type="test/html"
+        )
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    # ----------------------------------------------------------
     # TEST UPDATE
     # ----------------------------------------------------------
     def test_update_promotion(self):
@@ -150,6 +178,24 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_promotion = response.get_json()
         self.assertEqual(updated_promotion["title"], "Updated Title")
+
+    # ----------------------------------------------------------
+    # TEST UPDATE WITH NOT FOUND PROMOTION
+    # ----------------------------------------------------------
+    def test_update_promotion_with_invalid_id(self):
+        """It should not update promotion because it is not found"""
+        test_promotion = PromotionFactory()
+        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # update the promotion
+        new_promotion = response.get_json()
+        logging.debug(new_promotion)
+        new_promotion["title"] = "Updated Title"
+        response = self.client.put(
+            f"{BASE_URL}/{new_promotion['id'] + 1}", json=new_promotion
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # ----------------------------------------------------------
     # TEST DELETE
@@ -200,3 +246,14 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 5)
+
+    # ----------------------------------------------------------
+    # TEST LIST WITH TITLE
+    # ----------------------------------------------------------
+    def test_get_promotion_list_with_title(self):
+        """It should Get a list of Promotions"""
+        test_promotion = self._create_promotions(1)[0]
+        response = self.client.get(f"{BASE_URL}?title={test_promotion.title}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 1)

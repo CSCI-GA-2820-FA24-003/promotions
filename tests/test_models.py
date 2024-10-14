@@ -158,3 +158,26 @@ class TestPromotion(TestCase):
         # delete the promotion and make sure it isn't in the database
         promotion.delete()
         self.assertEqual(len(Promotion.all()), 0)
+
+    def test_deserialize_with_key_error(self):
+        """It should not Deserialize a promotion with a KeyError"""
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.deserialize, {})
+
+    def test_deserialize_with_type_error(self):
+        """It should not Deserialize a promotion with a TypeError"""
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.deserialize, [])
+
+    def test_create_error(self):
+        """It should not create due to error"""
+        promotion = PromotionFactory()
+        promotion.duration = -1
+        self.assertRaises(DataValidationError, promotion.create)
+
+    def test_update_error(self):
+        """It should not update due to error"""
+        promotion = PromotionFactory()
+        promotion.create()
+        promotion.duration = -1
+        self.assertRaises(DataValidationError, promotion.update)
