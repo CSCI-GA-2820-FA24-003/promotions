@@ -23,9 +23,7 @@ class PromotionFactory(factory.Factory):
     promo_code = Faker("ean8")
     promo_type = LazyFunction(lambda: random.choice(list(PromotionType)))
     promo_value = Faker("random_number", digits=2, fix_len=False)
-    start_date = LazyFunction(lambda: date.today())
-    created_date = LazyFunction(lambda: date.today())
+    start_date = LazyFunction(date.today)
+    created_date = LazyFunction(date.today)
     duration = LazyFunction(lambda: timedelta(days=random.randint(1, 30)))
     active = Faker("boolean")
-
-    # Todo: Add your other attributes here...

@@ -1,3 +1,5 @@
+# pylint: disable=too-many-instance-attributes
+
 """
 Models for Promotion
 
@@ -165,3 +167,19 @@ class Promotion(db.Model):
         """
         logger.info("Processing title query for %s ...", title)
         return cls.query.filter(cls.title == title)
+
+    @classmethod
+    def find_by_field(cls, field_name, value):
+        """Returns all Promotions with the value for the field_name
+
+        Args:
+            field_name (string): the field you want to get value for
+            value: the value to match for
+        """
+        if not hasattr(cls, field_name):
+            raise DataValidationError(
+                f"Field '{field_name}' is not a valid attribute of {cls.__name__}."
+            )
+
+        logger.info("Processing filter query for %s = %s ...", field_name, value)
+        return cls.query.filter(getattr(cls, field_name) == value).all()

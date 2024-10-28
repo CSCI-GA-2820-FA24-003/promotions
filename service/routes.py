@@ -38,12 +38,12 @@ def index():
         jsonify(
             name="Promotion REST API Service",
             version="1.0",
-            description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, " +
-            "and delete promotions.",
+            description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, "
+            + "and delete promotions.",
             paths={
                 "list_promotions": {
                     "method": "GET",
-                    "url": url_for("list_promotions", _external=True)
+                    "url": url_for("list_promotions", _external=True),
                 },
                 "get_promotion": {
                     "method": "GET",
@@ -55,13 +55,13 @@ def index():
                 },
                 "update_promotion": {
                     "method": "PUT",
-                    "url": url_for("update_promotion", promotion_id=1, _external=True)
+                    "url": url_for("update_promotion", promotion_id=1, _external=True),
                 },
                 "delete_promotion": {
                     "method": "DELETE",
-                    "url": url_for("delete_promotion", promotion_id=1, _external=True)
-                }
-            }
+                    "url": url_for("delete_promotion", promotion_id=1, _external=True),
+                },
+            },
         ),
         status.HTTP_200_OK,
     )
@@ -227,6 +227,3 @@ def check_content_type(content_type) -> None:
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {content_type}",
     )
-
-
-# Todo: Additional REST API endpoints (Update, Delete).
