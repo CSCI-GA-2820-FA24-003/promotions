@@ -257,3 +257,31 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 1)
+
+    # ----------------------------------------------------------
+    # TEST TOGGLE ACTIVE
+    # ----------------------------------------------------------
+    def test_toggle_active(self):
+        """It should toggle active for target promotion"""
+        test_promotion = self._create_promotions(1)[0]
+        self.toggle_helper(test_promotion, True)
+        self.toggle_helper(test_promotion, False)
+
+        response = self.client.put(f"{BASE_URL}/-1/activate", json={"active": True})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # ----------------------------------------------------------
+    # HELPER FUNCTION FOR test_toggle_active
+    # ----------------------------------------------------------
+    def toggle_helper(self, promotion, is_active):
+        """Send activate request, then check active status"""
+        active_json = {"active": is_active}
+        response = self.client.put(
+            f"{BASE_URL}/{promotion.id}/activate", json=active_json
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        get_response = self.client.get(f"{BASE_URL}/{promotion.id}")
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["active"], is_active)
