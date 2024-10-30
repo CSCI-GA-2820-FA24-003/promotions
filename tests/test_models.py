@@ -187,29 +187,22 @@ class TestPromotion(TestCase):
         promotion = PromotionFactory()
         promotion.create()
         self.assertIsNotNone(promotion.id)
-        title_found = Promotion.find_by_field("title", promotion.title)
-        desc_found = Promotion.find_by_field("description", promotion.description)
-        promo_code_found = Promotion.find_by_field("promo_code", promotion.promo_code)
-        promo_type_found = Promotion.find_by_field("promo_type", promotion.promo_type)
-        promo_value_found = Promotion.find_by_field(
-            "promo_value", promotion.promo_value
-        )
-        start_date_found = Promotion.find_by_field("start_date", promotion.start_date)
-        created_date_found = Promotion.find_by_field(
-            "created_date", promotion.created_date
-        )
-        duration_found = Promotion.find_by_field("duration", promotion.duration)
-        active_found = Promotion.find_by_field("active", promotion.active)
 
-        self.assertEqual(len(title_found), 1)
-        self.assertEqual(len(desc_found), 1)
-        self.assertEqual(len(promo_code_found), 1)
-        self.assertEqual(len(promo_type_found), 1)
-        self.assertEqual(len(promo_value_found), 1)
-        self.assertEqual(len(start_date_found), 1)
-        self.assertEqual(len(created_date_found), 1)
-        self.assertEqual(len(duration_found), 1)
-        self.assertEqual(len(active_found), 1)
+        params_map = {
+            "title": promotion.title,
+            "description": promotion.description,
+            "promo_code": promotion.promo_code,
+            "promo_type": promotion.promo_type,
+            "promo_value": promotion.promo_value,
+            "start_date": promotion.start_date,
+            "created_date": promotion.created_date,
+            "duration": promotion.duration,
+            "active": promotion.active,
+        }
+        data_found = Promotion.find_by_fields(query_params=params_map)
+
+        self.assertEqual(len(data_found), 1)
+        self.assertEqual(data_found[0].id, promotion.id)
 
     def test_query_error_field(self):
         """It should raise error for query because field is not present"""
@@ -218,8 +211,5 @@ class TestPromotion(TestCase):
         promotion.create()
 
         self.assertRaises(
-            DataValidationError,
-            Promotion.find_by_field,
-            "not_present_field",
-            promotion.title,
+            DataValidationError, Promotion.find_by_fields, {"not_present_field": -1}
         )

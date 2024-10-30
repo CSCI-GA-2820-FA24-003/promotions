@@ -169,17 +169,22 @@ class Promotion(db.Model):
         return cls.query.filter(cls.title == title)
 
     @classmethod
-    def find_by_field(cls, field_name, value):
-        """Returns all Promotions with the value for the field_name
+    def find_by_fields(cls, query_params):
+        """Returns all Promotions that match all field values provided in query_params.
 
         Args:
-            field_name (string): the field you want to get value for
-            value: the value to match for
-        """
-        if not hasattr(cls, field_name):
-            raise DataValidationError(
-                f"Field '{field_name}' is not a valid attribute of {cls.__name__}."
-            )
+            query_params (dict): A dictionary where keys are field names and values are the values to match for.
 
-        logger.info("Processing filter query for %s = %s ...", field_name, value)
-        return cls.query.filter(getattr(cls, field_name) == value).all()
+        Raises:
+            DataValidationError: If any field in query_params is not a valid attribute of the model.
+        """
+        query = cls.query
+        for field_name, value in query_params.items():
+            if not hasattr(cls, field_name):
+                raise DataValidationError(
+                    f"Field '{field_name}' is not a valid attribute of {cls.__name__}."
+                )
+            query = query.filter(getattr(cls, field_name) == value)
+
+        logger.info("Processing filter query with parameters: %s", query_params)
+        return query.all()
