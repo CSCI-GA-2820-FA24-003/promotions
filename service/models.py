@@ -169,6 +169,36 @@ class Promotion(db.Model):
         return cls.query.filter(cls.title == title)
 
     @classmethod
+    def find_by_promo_code(cls, promo_code):
+        """Returns all Promotions with the specified promo_code
+
+        Args:
+            promo_code (int): the promo_code of the Promotions you want to match
+        """
+        logger.info("Processing promo_code query for %s ...", promo_code)
+        return cls.query.filter(cls.promo_code == promo_code).all()
+
+    @classmethod
+    def find_by_promo_type(cls, promo_type):
+        """Returns all Promotions with the specified promo_type
+
+        Args:
+            promo_type (PromotionType): the type of the Promotions you want to match
+        """
+        logger.info("Processing promo_type query for %s ...", promo_type)
+        return cls.query.filter(cls.promo_type == promo_type).all()
+
+    @classmethod
+    def find_by_active(cls, active):
+        """Returns all Promotions with the specified active status
+
+        Args:
+            active (bool): the active status of the Promotions you want to match
+        """
+        logger.info("Processing active status query for %s ...", active)
+        return cls.query.filter(cls.active == active).all()
+
+    @classmethod
     def find_by_fields(cls, query_params):
         """Returns all Promotions that match all field values provided in query_params.
 

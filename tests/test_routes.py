@@ -22,9 +22,10 @@ TestPromotion API Service Test Suite
 import os
 import logging
 from unittest import TestCase
+from urllib.parse import quote_plus
 from wsgi import app
 from service.common import status
-from service.models import db, Promotion
+from service.models import db, Promotion, PromotionType
 from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
@@ -70,10 +71,15 @@ class TestYourResourceService(TestCase):
     # Utility function to bulk create promotions
     ############################################################
     def _create_promotions(self, count: int = 1) -> list:
-        """Factory method to create promotions in bulk"""
+        """Factory method to create promotions in bulk with specified attributes"""
         promotions = []
         for _ in range(count):
-            test_promotion = PromotionFactory()
+            test_promotion = PromotionFactory(
+                title="Discount Deal",
+                promo_code=12345,
+                promo_type=PromotionType.AMOUNT_DISCOUNT,
+                active=True,
+            )
             response = self.client.post(BASE_URL, json=test_promotion.serialize())
             self.assertEqual(
                 response.status_code,
@@ -235,6 +241,55 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
+
+    # ----------------------------------------------------------
+    # TEST QUERY
+    # ----------------------------------------------------------
+
+    def test_query_by_title(self):
+        """It should Query Promotions by title"""
+        promotions = self._create_promotions(5)
+        test_title = promotions[0].title
+        title_count = len(
+            [promotion for promotion in promotions if promotion.title == test_title]
+        )
+        response = self.client.get(f"{BASE_URL}?title={quote_plus(test_title)}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), title_count)
+        # check the data just to be sure
+        for promotion in data:
+            self.assertEqual(promotion["title"], test_title)
+
+    def test_query_by_promo_code(self):
+        """It should Query Promotions by promo_code"""
+        self._create_promotions(5)
+        response = self.client.get(f"{BASE_URL}?promo_code=12345")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        for promotion in data:
+            self.assertEqual(promotion["promo_code"], 12345)
+
+    def test_query_by_promo_type(self):
+        """It should Query Promotions by promo_type"""
+        self._create_promotions(5)
+        response = self.client.get(f"{BASE_URL}?promo_type=AMOUNT_DISCOUNT")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        for promotion in data:
+            self.assertEqual(promotion["promo_type"], "AMOUNT_DISCOUNT")
+
+    def test_query_by_active_status(self):
+        """It should Query Promotions by active status"""
+        self._create_promotions(5)
+        response = self.client.get(f"{BASE_URL}?active=true")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        for promotion in data:
+            self.assertEqual(promotion["active"], True)
 
     # ----------------------------------------------------------
     # TEST LIST
