@@ -23,7 +23,7 @@ and Delete Promotion
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from service.models import Promotion
+from service.models import Promotion, PromotionType
 from service.common import status  # HTTP Status Codes
 
 
@@ -84,10 +84,23 @@ def list_promotions():
 
     # Parse any arguments from the query string
     title = request.args.get("title")
+    promo_code = request.args.get("promo_code")
+    promo_type = request.args.get("promo_type")
+    active = request.args.get("active")
 
     if title:
         app.logger.info("Find by title: %s", title)
         promotions = Promotion.find_by_title(title)
+    elif promo_code:
+        app.logger.info("Find by promo_code: %s", promo_code)
+        promotions = Promotion.find_by_promo_code(int(promo_code))
+    elif promo_type:
+        app.logger.info("Find by promo_type: %s", promo_type)
+        promotions = Promotion.find_by_promo_type(PromotionType[promo_type.upper()])
+    elif active:
+        app.logger.info("Find by active status: %s", active)
+        active_value = active.lower() == "true"
+        promotions = Promotion.find_by_active(active_value)
     else:
         app.logger.info("Find all")
         promotions = Promotion.all()
