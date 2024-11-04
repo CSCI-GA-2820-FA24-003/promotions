@@ -15,12 +15,14 @@ jobs:
     # Required services    
     services:
       # Label used to access the service container
-      redis:
+      postgres:
         # Docker Hub image
-        image: redis
+        image: postgres:15-alpine
+          environment:
+          POSTGRES_PASSWORD: pgs3cr3t
         # Set health checks to wait until redis has started
         options: >-
-          --health-cmd "redis-cli ping"
+          --health-cmd "pg_isready"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
