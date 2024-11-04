@@ -12,15 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.11-slim
 
-    # Required services    
+    # Required services
     services:
       # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redis
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: pgs3cr3t
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
         # Set health checks to wait until redis has started
         options: >-
-          --health-cmd "redis-cli ping"
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -34,7 +38,7 @@ jobs:
         run: |
           python -m pip install poetry
           poetry config virtualenvs.create false
-          poetry lock --no-update
+          poetry lock
           poetry install
 
       - name: Linting
@@ -49,9 +53,14 @@ jobs:
       - name: Run unit tests with PyTest
         run: pytest --pspec --cov=service --cov-report=xml --cov-fail-under=95
         env:
-          DATABASE_URI: "postgresql+psycopg://postgres:postgres@localhost:5432/postgres"
+          FLASK_APP: "wsgi:app"
+          DATABASE_URI: "postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/testdb"
 
-     - name: Upload coverage reports to Codecov
-       uses: codecov/codecov-action@v3.1.4
-       with:
-          token: ${{ secrets.CODECOV_TOKEN }} 
+      # Create a CODECOV_TOKEN in Settings->Secrets and variables->Actions
+      # and then uncomment the CodeCov action during hands-on lab
+
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v3.1.4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }} 
+  
