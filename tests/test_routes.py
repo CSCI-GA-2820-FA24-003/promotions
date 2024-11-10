@@ -102,6 +102,14 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         self.assertEqual(data["name"], "Promotion REST API Service")
 
+    def test_health(self):
+        """It should be healthy"""
+        response = self.client.get("/health")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["status"], 200)
+        self.assertEqual(data["message"], "Healthy")
+
     # ----------------------------------------------------------
     # TEST CREATE
     # ----------------------------------------------------------
