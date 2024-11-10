@@ -8,7 +8,9 @@ All of the models are stored in this module
 
 import logging
 import enum
+from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Integer, Boolean, Float, Date, Interval
 
 logger = logging.getLogger("flask.app")
 
@@ -214,7 +216,34 @@ class Promotion(db.Model):
                 raise DataValidationError(
                     f"Field '{field_name}' is not a valid attribute of {cls.__name__}."
                 )
-            query = query.filter(getattr(cls, field_name) == value)
+
+            # Type casting based on the field's type
+            field = getattr(cls, field_name)
+            if isinstance(field.type, Integer):
+                value = int(value)
+            elif isinstance(field.type, Boolean):
+                value = value.lower() == "true"
+            elif isinstance(field.type, Float):
+                value = float(value)
+            elif isinstance(field.type, Date):
+                # Convert to Python date object (expected format: YYYY-MM-DD)
+                value = datetime.strptime(value, "%Y-%m-%d").date()
+            elif isinstance(field.type, Interval):
+                # Convert duration to timedelta
+                if not isinstance(value, timedelta):
+                    days, time_part = value.split(", ")
+                    days = int(days.split()[0])  # Extract days
+                    time_part = datetime.strptime(
+                        time_part, "%H:%M:%S"
+                    ).time()  # Extract time
+                    value = timedelta(
+                        days=days,
+                        hours=time_part.hour,
+                        minutes=time_part.minute,
+                        seconds=time_part.second,
+                    )
+
+            query = query.filter(field == value)
 
         logger.info("Processing filter query with parameters: %s", query_params)
         return query.all()
