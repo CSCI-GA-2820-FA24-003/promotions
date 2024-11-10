@@ -35,37 +35,6 @@ def index():
     """Root URL response"""
     app.logger.info("Request for Root URL")
     return app.send_static_file("index.html")
-    # return (
-    #     jsonify(
-    #         name="Promotion REST API Service",
-    #         version="1.0",
-    #         description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, "
-    #         + "and delete promotions.",
-    #         paths={
-    #             "list_promotions": {
-    #                 "method": "GET",
-    #                 "url": url_for("list_promotions", _external=True),
-    #             },
-    #             "get_promotion": {
-    #                 "method": "GET",
-    #                 "url": url_for("get_promotion", promotion_id=1, _external=True),
-    #             },
-    #             "create_promotion": {
-    #                 "method": "POST",
-    #                 "url": url_for("create_promotion", _external=True),
-    #             },
-    #             "update_promotion": {
-    #                 "method": "PUT",
-    #                 "url": url_for("update_promotion", promotion_id=1, _external=True),
-    #             },
-    #             "delete_promotion": {
-    #                 "method": "DELETE",
-    #                 "url": url_for("delete_promotion", promotion_id=1, _external=True),
-    #             },
-    #         },
-    #     ),
-    #     status.HTTP_200_OK,
-    # )
 
 
 ######################################################################
