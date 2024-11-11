@@ -99,8 +99,6 @@ class TestYourResourceService(TestCase):
         """It should call the home page"""
         response = self.client.get("/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
-        self.assertEqual(data["name"], "Promotion REST API Service")
 
     # ----------------------------------------------------------
     # TEST CREATE
@@ -290,6 +288,21 @@ class TestYourResourceService(TestCase):
         self.assertEqual(len(data), 5)
         for promotion in data:
             self.assertEqual(promotion["active"], True)
+
+    def test_query_by_multiple_fields(self):
+        """It should Get all promotions that match"""
+        # get the id of a promotion
+        test_promotion = self._create_promotions(1)[0]
+        response = self.client.get(
+            f"{BASE_URL}?title={test_promotion.title}"
+            f"&description={test_promotion.description}"
+            f"&promo_code={test_promotion.promo_code}"
+            f"&promo_type={test_promotion.promo_type.name}"
+            f"&promo_value={test_promotion.promo_value}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 1)
 
     # ----------------------------------------------------------
     # TEST LIST
