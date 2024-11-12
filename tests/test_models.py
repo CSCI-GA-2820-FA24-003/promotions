@@ -21,6 +21,7 @@ Test cases for promotion Model
 # pylint: disable=duplicate-code
 import os
 import logging
+from datetime import timedelta
 from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, db, PromotionType, DataValidationError
@@ -194,10 +195,17 @@ class TestPromotion(TestCase):
             "promo_code": promotion.promo_code,
             "promo_type": promotion.promo_type,
             "promo_value": promotion.promo_value,
-            "start_date": promotion.start_date,
-            "created_date": promotion.created_date,
-            "duration": promotion.duration,
-            "active": promotion.active,
+            "start_date": promotion.start_date.strftime("%Y-%m-%d"),
+            "created_date": promotion.created_date.strftime("%Y-%m-%d"),
+            "duration": (
+                f"{promotion.duration.days} days, "
+                f"{promotion.duration.seconds // 3600:02}:"
+                f"{(promotion.duration.seconds // 60) % 60:02}:"
+                f"{promotion.duration.seconds % 60:02}"
+                if isinstance(promotion.duration, timedelta)
+                else promotion.duration
+            ),
+            "active": str(promotion.active).lower(),  # Convert to "true" or "false"
         }
         data_found = Promotion.find_by_fields(query_params=params_map)
 

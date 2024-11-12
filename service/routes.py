@@ -43,37 +43,7 @@ def health_check():
 def index():
     """Root URL response"""
     app.logger.info("Request for Root URL")
-    return (
-        jsonify(
-            name="Promotion REST API Service",
-            version="1.0",
-            description="This is a RESTful service for managing e-commerce promotions. You can list, view, create, update, "
-            + "and delete promotions.",
-            paths={
-                "list_promotions": {
-                    "method": "GET",
-                    "url": url_for("list_promotions", _external=True),
-                },
-                "get_promotion": {
-                    "method": "GET",
-                    "url": url_for("get_promotion", promotion_id=1, _external=True),
-                },
-                "create_promotion": {
-                    "method": "POST",
-                    "url": url_for("create_promotion", _external=True),
-                },
-                "update_promotion": {
-                    "method": "PUT",
-                    "url": url_for("update_promotion", promotion_id=1, _external=True),
-                },
-                "delete_promotion": {
-                    "method": "DELETE",
-                    "url": url_for("delete_promotion", promotion_id=1, _external=True),
-                },
-            },
-        ),
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
 
 
 ######################################################################
@@ -91,28 +61,35 @@ def list_promotions():
 
     promotions = []
 
-    # Parse any arguments from the query string
-    title = request.args.get("title")
-    promo_code = request.args.get("promo_code")
-    promo_type = request.args.get("promo_type")
-    active = request.args.get("active")
-
-    if title:
-        app.logger.info("Find by title: %s", title)
-        promotions = Promotion.find_by_title(title)
-    elif promo_code:
-        app.logger.info("Find by promo_code: %s", promo_code)
-        promotions = Promotion.find_by_promo_code(int(promo_code))
-    elif promo_type:
-        app.logger.info("Find by promo_type: %s", promo_type)
-        promotions = Promotion.find_by_promo_type(PromotionType[promo_type.upper()])
-    elif active:
-        app.logger.info("Find by active status: %s", active)
-        active_value = active.lower() == "true"
-        promotions = Promotion.find_by_active(active_value)
+    if len(request.args) > 1:
+        app.logger.info("Query multiple params: %s", request.args)
+        params = {}
+        for key, value in request.args.items():
+            params[key] = value
+        promotions = Promotion.find_by_fields(params)
     else:
-        app.logger.info("Find all")
-        promotions = Promotion.all()
+        # Parse any arguments from the query string
+        title = request.args.get("title")
+        promo_code = request.args.get("promo_code")
+        promo_type = request.args.get("promo_type")
+        active = request.args.get("active")
+
+        if title:
+            app.logger.info("Find by title: %s", title)
+            promotions = Promotion.find_by_title(title)
+        elif promo_code:
+            app.logger.info("Find by promo_code: %s", promo_code)
+            promotions = Promotion.find_by_promo_code(int(promo_code))
+        elif promo_type:
+            app.logger.info("Find by promo_type: %s", promo_type)
+            promotions = Promotion.find_by_promo_type(PromotionType[promo_type.upper()])
+        elif active:
+            app.logger.info("Find by active status: %s", active)
+            active_value = active.lower() == "true"
+            promotions = Promotion.find_by_active(active_value)
+        else:
+            app.logger.info("Find all")
+            promotions = Promotion.all()
 
     results = [promotion.serialize() for promotion in promotions]
     app.logger.info("Returning %d promotions", len(results))
