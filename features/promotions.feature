@@ -65,7 +65,7 @@ Feature: The shopcarts service back-end
         And I should not see "nike promotion" in the results
 
         
-        # Mimic action route
+    # Mimic action route
     Scenario: Toggle Active for a Promotion
         When I visit the "Home Page"
         And I set the "title" to "nike promotion"
@@ -93,3 +93,30 @@ Feature: The shopcarts service back-end
         And I press the "Retrieve" button
         Then I should see the message "Success"
         And I should see "False" in the "active" dropdown
+
+    Scenario: Delete a Promotion
+        When I visit the "Home Page"
+        And I set the "id" to "1"
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "nike promotion" in the "title" field
+        And I should see "promo desc 1" in the "description" field
+        # Delete that promotion
+        When I press the "Delete" button
+        Then I should see the message "Promotion has been Deleted!"
+        When I set the "id" to "1"
+        And I press the "Retrieve" button
+        Then I should see the message "404 Not Found"
+
+    Scenario: Query a Promotion
+        When I visit the "Home Page"
+        And I set the "title" to "nike promotion"
+        And I set the "description" to "promo desc 1"
+        And I set the "promo_code" to "10001"
+        And I select "AMOUNT_DISCOUNT" in the "promo_type" dropdown
+        And I set the "promo_value" to "20%"
+        And I set the "start_date" to "10-22-2024"
+        And I set the "created_date" to "10-05-2024"
+        When I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "1" in the "id" field
