@@ -63,3 +63,33 @@ Feature: The shopcarts service back-end
         Then I should see the message "Success"
         And I should see "Holiday Discount" in the results
         And I should not see "nike promotion" in the results
+
+        
+        # Mimic action route
+    Scenario: Toggle Active for a Promotion
+        When I visit the "Home Page"
+        And I set the "title" to "nike promotion"
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "nike promotion" in the "title" field
+        And I should see "promo desc 1" in the "description" field
+        # Change active to true, was false 
+        When I select "True" in the "active" dropdown
+        And I press the "Update" button
+        Then I should see the message "Success"
+        When I copy the "id" field
+        And I press the "Clear" button
+        And I paste the "id" field
+        And I press the "Retrieve" button     
+        Then I should see the message "Success"
+        And I should see "True" in the "active" dropdown
+        # Change active to false, was changed to true
+        When I select "False" in the "active" dropdown
+        And I press the "Update" button
+        Then I should see the message "Success"
+        When I copy the "id" field
+        And I press the "Clear" button
+        And I paste the "id" field
+        And I press the "Retrieve" button
+        Then I should see the message "Success"
+        And I should see "False" in the "active" dropdown
