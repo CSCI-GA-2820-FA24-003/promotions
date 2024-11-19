@@ -120,3 +120,11 @@ Feature: The shopcarts service back-end
         When I press the "Search" button
         Then I should see the message "Success"
         And I should see "1" in the "id" field
+
+    Scenario: List all Promotions
+        When I visit the "Home Page"
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "nike promotion" in the results
+        And I should see "adidas promotion" in the results
+        And I should not see "puma promotion" in the results
