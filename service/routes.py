@@ -30,7 +30,6 @@ PUT /promotions/{id} - updates a promotion active status in the database
 """
 
 import secrets
-from functools import wraps
 from flask import jsonify, request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Resource, fields, reqparse, inputs
@@ -81,7 +80,7 @@ create_model = api.model(
             required=True,
             description="The type of the Promotion (e.g., percentage, fixed amount, etc.)",
         ),
-        "promo_value": fields.Float(
+        "promo_value": fields.String(
             required=True,
             description="The value of the Promotion (e.g., 20 for 20% or $20 off)",
         ),
@@ -153,7 +152,7 @@ promotion_args.add_argument(
 )
 promotion_args.add_argument(
     "promo_value",
-    type=float,
+    type=str,
     location="args",
     required=False,
     help="Filter Promotions by value",
@@ -191,21 +190,21 @@ promotion_args.add_argument(
 ######################################################################
 # Authorization Decorator
 ######################################################################
-def token_required(func):
-    """Decorator to require a token for this endpoint"""
+# def token_required(func):
+#     """Decorator to require a token for this endpoint"""
 
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        token = None
-        if "X-Api-Key" in request.headers:
-            token = request.headers["X-Api-Key"]
+#     @wraps(func)
+#     def decorated(*args, **kwargs):
+#         token = None
+#         if "X-Api-Key" in request.headers:
+#             token = request.headers["X-Api-Key"]
 
-        if app.config.get("API_KEY") and app.config["API_KEY"] == token:
-            return func(*args, **kwargs)
+#         if app.config.get("API_KEY") and app.config["API_KEY"] == token:
+#             return func(*args, **kwargs)
 
-        return {"message": "Invalid or missing token"}, 401
+#         return {"message": "Invalid or missing token"}, 401
 
-    return decorated
+#     return decorated
 
 
 ######################################################################
@@ -261,7 +260,6 @@ class PromotionResource(Resource):
     @api.response(400, "The posted Promotion data was not valid")
     @api.expect(promotion_model)
     @api.marshal_with(promotion_model)
-    @token_required
     def put(self, promotion_id):
         """
         Update a Promotion
@@ -295,13 +293,13 @@ class PromotionResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("delete_promotions", security="apikey")
     @api.response(204, "Promotion deleted")
-    @token_required
     def delete(self, promotion_id):
         """
         Delete a Promotion
 
         This endpoint will delete a Promotion based the id specified in the path
         """
+        promotion_id = int(promotion_id)
         app.logger.info("Request to Delete a promotion with id [%s]", promotion_id)
 
         # Delete the Promotion if it exists
@@ -376,7 +374,6 @@ class PromotionCollection(Resource):
     @api.response(400, "The posted data was not valid")
     @api.expect(create_model)
     @api.marshal_with(promotion_model, code=201)
-    @token_required
     def post(self):
         """
         Creates a Promotion
@@ -408,7 +405,6 @@ class PromotionCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc("delete_all_promotions", security="apikey")
     @api.response(204, "All Promotions deleted")
-    @token_required
     def delete(self):
         """
         Delete all Promotion
@@ -438,7 +434,6 @@ class ToggleActivateResource(Resource):
     @api.marshal_with(promotion_model)
     @api.response(404, "promotion not found")
     @api.response(409, "The promotion is not available for toggling")
-    @token_required
     def put(self, promotion_id):
         """
         Toggle active for a promotion
