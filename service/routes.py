@@ -74,7 +74,7 @@ create_model = api.model(
         "description": fields.String(
             required=False, description="A detailed description of the Promotion"
         ),
-        "promo_code": fields.String(
+        "promo_code": fields.Integer(
             required=True, description="The unique promotional code for the Promotion"
         ),
         "promo_type": fields.String(
@@ -139,7 +139,7 @@ promotion_args.add_argument(
 )
 promotion_args.add_argument(
     "promo_code",
-    type=str,
+    type=int,
     location="args",
     required=False,
     help="Filter Promotions by promotional code",
