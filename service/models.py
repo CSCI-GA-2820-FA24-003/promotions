@@ -100,7 +100,7 @@ class Promotion(db.Model):
 
     def serialize(self):
         """Serializes a Promotion into a dictionary"""
-        return {
+        promotion = {
             "id": self.id,
             "title": self.title,
             "description": self.description,
@@ -112,6 +112,10 @@ class Promotion(db.Model):
             "duration": str(self.duration),
             "active": self.active,
         }
+
+        if self.id:
+            promotion["_id"] = self.id
+        return promotion
 
     def deserialize(self, data):
         """
