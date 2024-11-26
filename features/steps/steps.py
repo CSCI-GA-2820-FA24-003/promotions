@@ -45,14 +45,14 @@ def step_impl(context):
     # and delete them one by one
     for promotion in context.resp.json():
         context.resp = requests.delete(
-            f"{rest_endpoint}/{promotion['id']}", timeout=WAIT_TIMEOUT
+            f"{rest_endpoint}/{promotion['_id']}", timeout=WAIT_TIMEOUT
         )
         expect(context.resp.status_code).equal_to(HTTP_204_NO_CONTENT)
 
     # load the database with new promotions
     for row in context.table:
         payload = {
-            "id": row["id"],
+            "_id": row["_id"],
             "title": row["title"],
             "description": row["description"],
             "promo_code": row["promo_code"],

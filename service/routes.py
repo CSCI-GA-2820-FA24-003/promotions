@@ -106,7 +106,7 @@ promotion_model = api.inherit(
     "PromotionModel",
     create_model,
     {
-        "_id": fields.String(
+        "id": fields.String(
             readOnly=True, description="The unique id assigned internally by service"
         ),
     },
@@ -423,51 +423,6 @@ class PromotionCollection(Resource):
             app.logger.warning("Request to clear database while system not under test")
 
         return "", status.HTTP_204_NO_CONTENT
-
-
-######################################################################
-# LIST ALL PROMOTIONS
-######################################################################
-@app.route("/promotions", methods=["GET"])
-def list_promotions():
-    """Returns all of the Promotions"""
-    app.logger.info("Request for promotion list")
-
-    promotions = []
-
-    if len(request.args) > 1:
-        app.logger.info("Query multiple params: %s", request.args)
-        params = {}
-        for key, value in request.args.items():
-            params[key] = value
-        promotions = Promotion.find_by_fields(params)
-    else:
-        # Parse any arguments from the query string
-        title = request.args.get("title")
-        promo_code = request.args.get("promo_code")
-        promo_type = request.args.get("promo_type")
-        active = request.args.get("active")
-
-        if title:
-            app.logger.info("Find by title: %s", title)
-            promotions = Promotion.find_by_title(title)
-        elif promo_code:
-            app.logger.info("Find by promo_code: %s", promo_code)
-            promotions = Promotion.find_by_promo_code(int(promo_code))
-        elif promo_type:
-            app.logger.info("Find by promo_type: %s", promo_type)
-            promotions = Promotion.find_by_promo_type(PromotionType[promo_type.upper()])
-        elif active:
-            app.logger.info("Find by active status: %s", active)
-            active_value = active.lower() == "true"
-            promotions = Promotion.find_by_active(active_value)
-        else:
-            app.logger.info("Find all")
-            promotions = Promotion.all()
-
-    results = [promotion.serialize() for promotion in promotions]
-    app.logger.info("Returning %d promotions", len(results))
-    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################

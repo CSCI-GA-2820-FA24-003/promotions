@@ -32,6 +32,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
 BASE_URL = "/api/promotions"
+CONTENT_TYPE_JSON = "application/json"
 
 ######################################################################
 #  T E S T   C A S E S
@@ -60,6 +61,7 @@ class TestYourResourceService(TestCase):
     def setUp(self):
         """Runs before each test"""
         self.client = app.test_client()
+        self.headers = {"X-Api-Key": app.config["API_KEY"]}
         db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
 
@@ -80,7 +82,11 @@ class TestYourResourceService(TestCase):
                 promo_type=PromotionType.AMOUNT_DISCOUNT,
                 active=True,
             )
-            response = self.client.post(BASE_URL, json=test_promotion.serialize())
+            response = self.client.post(
+                BASE_URL,
+                json=test_promotion.serialize(),
+                headers=self.headers,
+            )
             self.assertEqual(
                 response.status_code,
                 status.HTTP_201_CREATED,
@@ -115,7 +121,11 @@ class TestYourResourceService(TestCase):
         """It should Create a new promotion"""
         test_promotion = PromotionFactory()
         logging.debug("Test promotion: %s", test_promotion.serialize())
-        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        response = self.client.post(
+            BASE_URL,
+            json=test_promotion.serialize(),
+            headers=self.headers,
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Make sure location header is set
@@ -126,7 +136,9 @@ class TestYourResourceService(TestCase):
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["title"], test_promotion.title)
         self.assertEqual(new_promotion["description"], test_promotion.description)
-        self.assertEqual(new_promotion["promo_code"], int(test_promotion.promo_code))
+        self.assertEqual(
+            int(new_promotion["promo_code"]), int(test_promotion.promo_code)
+        )
         self.assertEqual(new_promotion["promo_type"], test_promotion.promo_type.name)
         self.assertEqual(int(new_promotion["promo_value"]), test_promotion.promo_value)
         self.assertEqual(new_promotion["active"], test_promotion.active)
@@ -137,7 +149,9 @@ class TestYourResourceService(TestCase):
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["title"], test_promotion.title)
         self.assertEqual(new_promotion["description"], test_promotion.description)
-        self.assertEqual(new_promotion["promo_code"], int(test_promotion.promo_code))
+        self.assertEqual(
+            int(new_promotion["promo_code"]), int(test_promotion.promo_code)
+        )
         self.assertEqual(new_promotion["promo_type"], test_promotion.promo_type.name)
         self.assertEqual(int(new_promotion["promo_value"]), test_promotion.promo_value)
         self.assertEqual(new_promotion["active"], test_promotion.active)
@@ -156,7 +170,11 @@ class TestYourResourceService(TestCase):
     def test_create_promotion_empty_data(self):
         """It should not create a promotion because of empty data"""
         logging.debug("Test promotion with empty data")
-        response = self.client.post(BASE_URL, json={})
+        response = self.client.post(
+            BASE_URL,
+            json={},
+            headers=self.headers,
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     # ----------------------------------------------------------
@@ -166,7 +184,10 @@ class TestYourResourceService(TestCase):
         """It should not create a promotion when sending wrong media type"""
         test_promotion = PromotionFactory()
         response = self.client.post(
-            BASE_URL, json=test_promotion.serialize(), content_type="test/html"
+            BASE_URL,
+            json=test_promotion.serialize(),
+            content_type="test/html",
+            headers=self.headers,
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
@@ -177,7 +198,11 @@ class TestYourResourceService(TestCase):
         """It should Update an existing Promotion"""
         # create a promotion to update
         test_promotion = PromotionFactory()
-        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        response = self.client.post(
+            BASE_URL,
+            json=test_promotion.serialize(),
+            headers=self.headers,
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # update the promotion
@@ -185,7 +210,9 @@ class TestYourResourceService(TestCase):
         logging.debug(new_promotion)
         new_promotion["title"] = "Updated Title"
         response = self.client.put(
-            f"{BASE_URL}/{new_promotion['id']}", json=new_promotion
+            f"{BASE_URL}/{new_promotion['id']}",
+            json=new_promotion,
+            headers=self.headers,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_promotion = response.get_json()
@@ -197,7 +224,11 @@ class TestYourResourceService(TestCase):
     def test_update_promotion_with_invalid_id(self):
         """It should not update promotion because it is not found"""
         test_promotion = PromotionFactory()
-        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        response = self.client.post(
+            BASE_URL,
+            json=test_promotion.serialize(),
+            headers=self.headers,
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # update the promotion
@@ -205,7 +236,9 @@ class TestYourResourceService(TestCase):
         logging.debug(new_promotion)
         new_promotion["title"] = "Updated Title"
         response = self.client.put(
-            f"{BASE_URL}/{new_promotion['id'] + 1}", json=new_promotion
+            f"{BASE_URL}/{int(new_promotion['id']) + 1}",
+            json=new_promotion,
+            headers=self.headers,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -215,16 +248,24 @@ class TestYourResourceService(TestCase):
     def test_delete_promotion(self):
         """It should Delete a Promotion"""
         test_promotion = self._create_promotions(1)[0]
-        response = self.client.delete(f"{BASE_URL}/{test_promotion.id}")
+        response = self.client.delete(
+            f"{BASE_URL}/{test_promotion.id}", headers=self.headers
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
         # make sure they are deleted
         response = self.client.get(f"{BASE_URL}/{test_promotion.id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_delete_all_promotion(self):
+        """It should Delete all Promotions"""
+        response = self.client.delete(f"{BASE_URL}", headers=self.headers)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+
     def test_delete_non_existing_promotion(self):
         """It should Delete a Promotion even if it doesn't exist"""
-        response = self.client.delete(f"{BASE_URL}/0")
+        response = self.client.delete(f"{BASE_URL}/0", headers=self.headers)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
 
@@ -275,7 +316,7 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         self.assertEqual(len(data), 5)
         for promotion in data:
-            self.assertEqual(promotion["promo_code"], 12345)
+            self.assertEqual(int(promotion["promo_code"]), 12345)
 
     def test_query_by_promo_type(self):
         """It should Query Promotions by promo_type"""
@@ -343,7 +384,11 @@ class TestYourResourceService(TestCase):
         self.toggle_helper(test_promotion, True)
         self.toggle_helper(test_promotion, False)
 
-        response = self.client.put(f"{BASE_URL}/-1/activate", json={"active": True})
+        response = self.client.put(
+            f"{BASE_URL}/-1/activate",
+            json={"active": True},
+            headers=self.headers,
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # ----------------------------------------------------------
@@ -353,7 +398,9 @@ class TestYourResourceService(TestCase):
         """Send activate request, then check active status"""
         active_json = {"active": is_active}
         response = self.client.put(
-            f"{BASE_URL}/{promotion.id}/activate", json=active_json
+            f"{BASE_URL}/{promotion.id}/activate",
+            json=active_json,
+            headers=self.headers,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
