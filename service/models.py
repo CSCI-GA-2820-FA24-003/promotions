@@ -18,6 +18,10 @@ logger = logging.getLogger("flask.app")
 db = SQLAlchemy()
 
 
+class DatabaseConnectionError(Exception):
+    """Custom Exception when database connection fails"""
+
+
 class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
 
@@ -100,7 +104,7 @@ class Promotion(db.Model):
 
     def serialize(self):
         """Serializes a Promotion into a dictionary"""
-        return {
+        promotion = {
             "id": self.id,
             "title": self.title,
             "description": self.description,
@@ -112,6 +116,10 @@ class Promotion(db.Model):
             "duration": str(self.duration),
             "active": self.active,
         }
+
+        if self.id:
+            promotion["id"] = self.id
+        return promotion
 
     def deserialize(self, data):
         """
@@ -147,6 +155,15 @@ class Promotion(db.Model):
     ##################################################
     # CLASS METHODS
     ##################################################
+
+    @classmethod
+    def remove_all(cls):
+        """Removes all documents from the database (use for testing)"""
+        logger.info("Deleting all Promotions")
+        count = cls.query.delete(synchronize_session=False)
+        db.session.commit()
+        logger.info("Deleted %d record(s).", count)
+        return count  # Return the number of deleted records
 
     @classmethod
     def all(cls):
