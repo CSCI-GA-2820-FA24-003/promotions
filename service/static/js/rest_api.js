@@ -12,8 +12,8 @@ $(function () {
         $("#promotion_promo_code").val(res.promo_code);
         $("#promotion_promo_value").val(res.promo_value);
         $("#promotion_promo_type").val(res.promo_type);
-        $("#promotion_start_date").val((new Date(res.start_date)).toISOString().split('T')[0]);
-        $("#promotion_created_date").val((new Date(res.created_date)).toISOString().split('T')[0]);
+        $("#promotion_start_date").val((res.start_date ? new Date(res.start_date) : new Date()).toISOString().split('T')[0]);
+        $("#promotion_created_date").val((res.created_date ? new Date(res.created_date) : new Date()).toISOString().split('T')[0]);
         $("#promotion_duration").val(res.duration);
         if (res.active == true) {
             $("#promotion_active").val("true");
@@ -292,7 +292,11 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            flash_message(res.responseJSON.message)
+            if(res.responseJSON.message){
+                flash_message(res.responseJSON.message)
+            }else{
+                flash_message("Failed to search")
+            }
         });
 
     });
