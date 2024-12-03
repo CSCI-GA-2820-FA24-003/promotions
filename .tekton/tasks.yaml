@@ -283,3 +283,44 @@ spec:
 
         echo "***** Running Tests *****"
         behave
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: wait-for-ready
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/categories: Deployment
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/tags: readiness, curl
+    tekton.dev/displayName: "Wait for Ready"
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: "Waits for the application to be ready by pinging the health or base URL."
+  params:
+    - name: base-url
+      description: The base URL of the application to check
+      type: string
+    - name: wait-seconds
+      description: Maximum time to wait for the server (in seconds)
+      type: string
+      default: "60"
+  steps:
+    - name: wait
+      image: curlimages/curl:latest
+      script: |
+        #!/bin/sh
+        set -e
+        echo "Checking server readiness at $(params.base-url)..."
+        for i in $(seq 1 $(params.wait-seconds)); do
+          if curl -s -o /dev/null "$(params.base-url)"; then
+            echo "Server is ready!"
+            exit 0
+          fi
+          echo "Server not ready, retrying in 5 seconds..."
+          sleep 5
+        done
+        echo "Server did not become ready within $(params.wait-seconds) seconds."
+        exit 1
