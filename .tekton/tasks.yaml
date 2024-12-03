@@ -294,22 +294,33 @@ metadata:
   annotations:
     tekton.dev/categories: Deployment
     tekton.dev/pipelines.minVersion: "0.17.0"
-    tekton.dev/tags: readiness, wait
+    tekton.dev/tags: readiness, curl
     tekton.dev/displayName: "Wait for Ready"
     tekton.dev/platforms: "linux/amd64"
 spec:
-  description: "Waits for a fixed period of time without performing any checks."
+  description: "Waits for the application to be ready by pinging the health or base URL."
   params:
-    - name: wait-seconds
-      description: The number of seconds to wait
+    - name: base-url
+      description: The base URL of the application to check
       type: string
-      default: "120"  # Default to 2 minutes
+    - name: wait-seconds
+      description: Maximum time to wait for the server (in seconds)
+      type: string
+      default: "60"
   steps:
     - name: wait
-      image: bash:latest
+      image: curlimages/curl:latest
       script: |
-        #!/bin/bash
+        #!/bin/sh
         set -e
-        echo "Waiting for $(params.wait-seconds) seconds..."
-        sleep $(params.wait-seconds)
-        echo "Wait complete."
+        echo "Checking server readiness at $(params.base-url)..."
+        for i in $(seq 1 $(params.wait-seconds)); do
+          if curl -s -o /dev/null "$(params.base-url)"; then
+            echo "Server is ready!"
+            exit 0
+          fi
+          echo "Server not ready, retrying in 5 seconds..."
+          sleep 5
+        done
+        echo "Server did not become ready within $(params.wait-seconds) seconds."
+        exit 1
