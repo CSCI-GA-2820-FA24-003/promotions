@@ -125,9 +125,8 @@ Scenario: Query a Promotion
     And I set the "description" to "promo desc 1"
     And I set the "promo_code" to "10001"
     And I select "AMOUNT_DISCOUNT" in the "promo_type" dropdown
-    And I set the "promo_value" to "20%"
     And I set the "start_date" to "10-22-2024"
     And I set the "created_date" to "10-05-2024"
     When I press the "Search" button
     Then I should see the message "Success"
-    And I should see "1" in the "id" field
+    And I should see "20%" in the "promo_value" field
